@@ -203,8 +203,11 @@ os.remove("luma.zip")
 os.remove("godmode9.zip")
 
 
-if windows:
+if current_platform == "windows":
     copy_tree("SD Card", f"{SD}:/")
+    print("\n===== Finished, your SD card is setup! =====")
+elif current_platform == "macos":
+    copy_tree("SD Card", f"{SD}/")
     print("\n===== Finished, your SD card is setup! =====")
 else:
     file_paths = list()
