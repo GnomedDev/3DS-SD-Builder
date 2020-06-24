@@ -7,15 +7,17 @@ from zipfile import ZipFile
 from distutils.dir_util import copy_tree
 
 if platform == "win32":
-    windows = True
+    current_platform = "windows"    
+elif platform == "darwin":
+    current_platform = "macos"
 else:
-    windows = False
+    current_platform = "other"
 
 if os.path.exists("movable.sed") is False:
     print("===== ERROR: Please download your movable.sed and place it in the same folder as this script =====")
     raise SystemExit 
 
-if windows:
+if current_platform == "windows":
     SD = input("What drive letter is your SD card: ")
     if os.path.exists(f"{SD}:/Nintendo 3DS/"):
         folder = os.listdir(f"{SD}:/Nintendo 3DS/")
@@ -47,6 +49,58 @@ if windows:
     else:
         print (f"===== ERROR: {SD}:/Nintendo 3DS/ doesn't exist, make sure you put the right SD card drive letter =====")
         raise SystemExit 
+        
+elif current_platform == "macos":
+    SD_name = input("What is the name of your SD card: ")
+    SD = f"/Volumes/{SD_name}"
+    if os.path.exists(f"{SD}/Nintendo 3DS/"):
+        folder = os.listdir(f"{SD}/Nintendo 3DS/")
+        
+        # macOS creates a few "hidden" folders, including .DS_Store.
+        # The following code is designed to filter such hidden folders out by checking
+        # to see if the folder name starts with a "." character, which designates a
+        # hidden file or folder.
+        
+        for hidden_folder in folder:
+            if hidden_folder.startswith("."):
+                folder.remove(hidden_folder)
+        
+        if len(folder) >= 2:
+            id0 = input("What is your id0: ")
+            if os.path.exists(f"{SD}/Nintendo 3DS/{id0}") is False:
+                print (f"===== ERROR: {SD}:/Nintendo 3DS/{id0} doesn't exist, make sure you put the right SD card name and id0 =====")
+                raise SystemExit 
+        else:
+            try:
+                id0 = [id0 for id0 in folder][0]
+            except IndexError:
+                print (f"===== ERROR: {SD}:/Nintendo 3DS/<id1> doesn't exist =====")
+                raise SystemExit 
+
+        folder = os.listdir(f"{SD}/Nintendo 3DS/{id0}")
+        
+        # See above for notes on hidden folders, and why this code is used.
+        
+        for hidden_folder in folder:
+            if hidden_folder.startswith("."):
+                folder.remove(hidden_folder)
+        
+        if len(folder) >= 2:
+            id1 = input("What is your id1 (folder inside id0): ")
+            if os.path.exists(f"{SD}/Nintendo 3DS/{id0}/{id1}") is False:
+                print (f"===== ERROR: {SD}/Nintendo 3DS/{id0}/{id1} doesn't exist, make sure you put the right id1 =====")
+                raise SystemExit 
+        else:
+            try:
+                id1 = [id1 for id1 in folder][0]
+            except IndexError:
+                print (f"===== ERROR: {SD}/Nintendo 3DS/{id0}/<id1> doesn't exist =====")
+                raise SystemExit 
+
+    else:
+        print (f"===== ERROR: {SD}/Nintendo 3DS/ doesn't exist, make sure you put the right SD card name =====")
+        raise SystemExit 
+    
 
 else:
     id0 = input("What is your id0: ")
@@ -149,8 +203,11 @@ os.remove("luma.zip")
 os.remove("godmode9.zip")
 
 
-if windows:
+if current_platform == "windows":
     copy_tree("SD Card", f"{SD}:/")
+    print("\n===== Finished, your SD card is setup! =====")
+elif current_platform == "macos":
+    copy_tree("SD Card", f"{SD}/")
     print("\n===== Finished, your SD card is setup! =====")
 else:
     file_paths = list()
