@@ -1,7 +1,15 @@
 # 3DS SD Builder
 ## USM-Finalizing.py
 Automates Section 1 of [Installing B9S (usm)](https://3ds.hacks.guide/installing-boot9strap-(usm).html), "what you need" and section 1 of [Finalizing Setup](https://3ds.hacks.guide/finalizing-setup)  
-Usage: Put movable.sed in the same folder and run the python script with python3
+
+Windows Usage:  
+Run the exe (no python needed) or the .py with movable.sed in the same folder.
+
+macOS Usage:  
+Run the source python file with python3 with movable.sed in the same folder.  
+
+Linux Usage:  
+Run the source python file with python3 with movable.sed in the same folder (haven't tested, PR the readme if you tested.)
 
 ## Finalizing.py
 Automates "what you need" and section 1 of [Finalizing Setup](https://3ds.hacks.guide/finalizing-setup)  

@@ -1,7 +1,7 @@
 import os
 import shutil
 import requests
-from sys import platform
+from sys import platform, argv
 from codecs import encode
 from zipfile import ZipFile
 from distutils.dir_util import copy_tree
@@ -14,8 +14,11 @@ else:
     current_platform = "other"
 
 if os.path.exists("movable.sed") is False:
-    print("===== ERROR: Please download your movable.sed and place it in the same folder as this script =====")
-    raise SystemExit 
+    if len(argv) == 2 and os.path.exists(argv[1]) and argv[1].endswith(".sed"):
+        shutil.copy2(argv[1], "movable.sed")
+    else:
+        print("===== ERROR: Please download your movable.sed and place it in the same folder as this script =====")
+        raise SystemExit 
 
 if current_platform in ["macos", "windows"]:
     if current_platform == "windows":
