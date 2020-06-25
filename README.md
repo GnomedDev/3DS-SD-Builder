@@ -1,6 +1,9 @@
-# Auto-USM-SD-Builder
+# 3DS SD Builder
+### USM-Finalizing.py
 Grabs usm-bb3.zip, downloads all the required files, and puts them in the right places.
 Put movable.sed in the same folder and run the python script with python3!
+
+
 
 
 ## Credits:
