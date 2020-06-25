@@ -1,2 +1,8 @@
 *.sed
+*.cia
+*.3dsx
+*.zip
+*.pyc
 .DS_Store
+SD Card
+temp

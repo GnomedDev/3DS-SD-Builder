@@ -1,12 +1,17 @@
 # 3DS SD Builder
-### USM-Finalizing.py
-Grabs usm-bb3.zip, downloads all the required files, and puts them in the right places.
-Put movable.sed in the same folder and run the python script with python3!
+## USM-Finalizing.py
+Automates Section 1 of [Installing B9S (usm)](https://3ds.hacks.guide/installing-boot9strap-(usm).html), "what you need" and section 1 of [Finalizing Setup](https://3ds.hacks.guide/finalizing-setup)  
+Usage: Put movable.sed in the same folder and run the python script with python3
 
-
-
+## Finalizing.py
+Automates "what you need" and section 1 of [Finalizing Setup](https://3ds.hacks.guide/finalizing-setup)  
+Usage:
+Run the python script with python3
 
 ## Credits:
-* ME: for making most of the script
-* https://hackersandslackers.com/extract-data-from-complex-json-python/ : for the extract values function
-* nicl83#7436: for helping me with extracting the keyY (because I don't know binary stuff)
+
+nicl83#7436: Helping me with extracting the keyY from movable.sed
+
+### Testers
+nicl83#7436: macOS testing  
+iFealarsi#9602: macOS testing

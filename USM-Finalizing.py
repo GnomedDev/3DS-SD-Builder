@@ -17,115 +17,71 @@ if os.path.exists("movable.sed") is False:
     print("===== ERROR: Please download your movable.sed and place it in the same folder as this script =====")
     raise SystemExit 
 
-if current_platform == "windows":
-    SD = input("What drive letter is your SD card: ")
-    if os.path.exists(f"{SD}:/Nintendo 3DS/"):
-        folder = os.listdir(f"{SD}:/Nintendo 3DS/")
-        if len(folder) >= 2:
-            id0 = input("What is your id0: ")
-            if os.path.exists(f"{SD}:/Nintendo 3DS/{id0}") is False:
-                print (f"===== ERROR: {SD}:/Nintendo 3DS/{id0} doesn't exist, make sure you put the right SD card drive letter and id0 =====")
-                raise SystemExit 
-        else:
-            try:
-                id0 = [id0 for id0 in folder][0]
-            except IndexError:
-                print (f"===== ERROR: {SD}:/Nintendo 3DS/<id1> doesn't exist =====")
-                raise SystemExit 
+if current_platform in ["macos", "windows"]:
+    if current_platform == "windows":
+        SD = f'{input("What drive letter is your SD card: ")}:/'
+    elif current_platform == "macos":
+        SD_name = input("What is the name of your SD card: ")
+        SD = f"/Volumes/{SD_name}/"
 
-        folder = os.listdir(f"{SD}:/Nintendo 3DS/{id0}")
-        if len(folder) >= 2:
-            id1 = input("What is your id1 (folder inside id0): ")
-            if os.path.exists(f"{SD}:/Nintendo 3DS/{id0}/{id1}") is False:
-                print (f"===== ERROR: {SD}:/Nintendo 3DS/{id0}/{id1} doesn't exist, make sure you put the right id1 =====")
-                raise SystemExit 
-        else:
-            try:
-                id1 = [id1 for id1 in folder][0]
-            except IndexError:
-                print (f"===== ERROR: {SD}:/Nintendo 3DS/{id0}/<id1> doesn't exist =====")
-                raise SystemExit 
+    if os.path.exists(f"{SD}Nintendo 3DS/"):
+        folder = os.listdir(f"{SD}Nintendo 3DS/")
 
-    else:
-        print (f"===== ERROR: {SD}:/Nintendo 3DS/ doesn't exist, make sure you put the right SD card drive letter =====")
-        raise SystemExit 
-        
-elif current_platform == "macos":
-    SD_name = input("What is the name of your SD card: ")
-    SD = f"/Volumes/{SD_name}"
-    if os.path.exists(f"{SD}/Nintendo 3DS/"):
-        folder = os.listdir(f"{SD}/Nintendo 3DS/")
-        
         # macOS creates a few "hidden" folders, including .DS_Store.
         # The following code is designed to filter such hidden folders out by checking
         # to see if the folder name starts with a "." character, which designates a
         # hidden file or folder.
-        
+
         for hidden_folder in folder:
             if hidden_folder.startswith("."):
                 folder.remove(hidden_folder)
-        
+            elif hidden_folder.lower() == "private":
+                folder.remove(hidden_folder)
+
         if len(folder) >= 2:
             id0 = input("What is your id0: ")
-            if os.path.exists(f"{SD}/Nintendo 3DS/{id0}") is False:
-                print (f"===== ERROR: {SD}:/Nintendo 3DS/{id0} doesn't exist, make sure you put the right SD card name and id0 =====")
+            if os.path.exists(f"{SD}Nintendo 3DS/{id0}") is False:
+                print (f"===== ERROR: {SD}Nintendo 3DS/{id0} doesn't exist, make sure you put the right id0 =====")
                 raise SystemExit 
         else:
             try:
-                id0 = [id0 for id0 in folder][0]
+                id0 = folder[0]
             except IndexError:
-                print (f"===== ERROR: {SD}:/Nintendo 3DS/<id1> doesn't exist =====")
+                print (f"===== ERROR: {SD}Nintendo 3DS/<id0> doesn't exist =====")
                 raise SystemExit 
 
-        folder = os.listdir(f"{SD}/Nintendo 3DS/{id0}")
-        
+        folder = os.listdir(f"{SD}Nintendo 3DS/{id0}")
+
         # See above for notes on hidden folders, and why this code is used.
-        
         for hidden_folder in folder:
             if hidden_folder.startswith("."):
                 folder.remove(hidden_folder)
-        
+
         if len(folder) >= 2:
             id1 = input("What is your id1 (folder inside id0): ")
-            if os.path.exists(f"{SD}/Nintendo 3DS/{id0}/{id1}") is False:
-                print (f"===== ERROR: {SD}/Nintendo 3DS/{id0}/{id1} doesn't exist, make sure you put the right id1 =====")
+            if os.path.exists(f"{SD}Nintendo 3DS/{id0}/{id1}") is False:
+                print (f"===== ERROR: {SD}Nintendo 3DS/{id0}/{id1} doesn't exist, make sure you put the right id1 =====")
                 raise SystemExit 
         else:
             try:
-                id1 = [id1 for id1 in folder][0]
+                id1 = folder[0]
             except IndexError:
-                print (f"===== ERROR: {SD}/Nintendo 3DS/{id0}/<id1> doesn't exist =====")
+                print (f"===== ERROR: {SD}Nintendo 3DS/{id0}/<id1> doesn't exist =====")
                 raise SystemExit 
-
     else:
-        print (f"===== ERROR: {SD}/Nintendo 3DS/ doesn't exist, make sure you put the right SD card name =====")
+        print (f"===== ERROR: {SD}Nintendo 3DS/ doesn't exist, make sure you put the right SD card drive letter =====")
         raise SystemExit 
-    
-
+        
 else:
     id0 = input("What is your id0: ")
     id1 = input("What is your id1: ")
 
-def extract_values(obj, key):
-  arr = []
-  def extract(obj, arr, key):
-    if isinstance(obj, dict):
-        for k, v in obj.items():
-            if isinstance(v, (dict, list)):
-                extract(v, arr, key)
-            elif k == key:
-                arr.append(v)
-    elif isinstance(obj, list):
-        for item in obj:
-            extract(item, arr, key)
-    return arr
-  results = extract(obj, arr, key)
-  return results
-
 def gitlatest(repo, file_name, file = 0):
     print(f"Downloading {file_name} from {repo}")
+
     repo1 = f"https://api.github.com/repos/{repo}/releases/latest"
-    url = extract_values(requests.get(repo1).json(), 'browser_download_url')[int(file)]
+    url = requests.get(repo1).json()["assets"][int(file)]["browser_download_url"]
+
     with open(file_name, "wb") as f:
         r = requests.get(url)
         f.write(r.content)
@@ -141,7 +97,7 @@ with open("usm.zip", "wb") as f:
     print(f"Downloading usm.zip from https://usm.bruteforcemovable.com")
     r = requests.get(f"https://usm.bruteforcemovable.com/?keyY={keyY}")
     f.write(r.content)
-    print(f"Finished downloading usm.zip from https://usm.bruteforcemovable.com")
+    print(f"Finished downloading usm.zip from https://usm.bruteforcemovable.com \n")
 
 gitlatest("LumaTeam/Luma3DS", "luma.zip")
 gitlatest("d0k3/GodMode9", "godmode9.zip")
@@ -203,12 +159,10 @@ os.remove("luma.zip")
 os.remove("godmode9.zip")
 
 
-if current_platform == "windows":
-    copy_tree("SD Card", f"{SD}:/")
+if current_platform in ["windows", "macos"]:
+    copy_tree("SD Card", SD)
     print("\n===== Finished, your SD card is setup! =====")
-elif current_platform == "macos":
-    copy_tree("SD Card", f"{SD}/")
-    print("\n===== Finished, your SD card is setup! =====")
+    
 else:
     file_paths = list()
 
