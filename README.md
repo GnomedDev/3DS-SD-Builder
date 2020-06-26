@@ -6,15 +6,15 @@ Windows Usage:
 Run the exe (no python needed) or the .py with movable.sed in the same folder.
 
 macOS Usage:  
-Run the source python file with python3 with movable.sed in the same folder.  
+Run the source python script with python3 with movable.sed in the same folder.  
 
 Linux Usage:  
-Run the source python file with python3 with movable.sed in the same folder (haven't tested, PR the readme if you tested.)
+Run the source python script with python3 with movable.sed in the same folder.
 
 ## Finalizing.py
 Automates "what you need" and section 1 of [Finalizing Setup](https://3ds.hacks.guide/finalizing-setup)  
 Usage:
-Run the python script with python3
+Run the source python script with python3.
 
 ## Credits:
 

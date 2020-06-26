@@ -6,17 +6,31 @@ from codecs import encode
 from zipfile import ZipFile
 from distutils.dir_util import copy_tree
 
-if platform == "win32":
-    current_platform = "windows"    
-elif platform == "darwin":
-    current_platform = "macos"
-else:
-    current_platform = "other"
+# Input platform on left, output on right
+# Allows for easy expandablity for platform compatiblity
+platform_translator = {
+    "linux": "linux",
+    "linux2": "linux",
+    "win32": "windows",
+    "darwin": "macos",
+}
 
-if current_platform == "windows":
-    SD = f'{input("What drive letter is your SD card: ")}:/'
-elif current_platform == "macos":
-    SD = f'/Volumes/{input("What is the name of your SD card: ")}/'
+if not platform in platform_translator:
+    current_platform = "other"
+else:
+    current_platform = platform_translator[platform]
+
+# Input platform on left, (how to format the path, prompt for input())
+# Again, cleans up for expandablity and probably speeds up code (also looks better).
+SD_translator = {
+    "windows": ("{}:/", "What drive letter is your SD Card: "),
+    "macos": ("/Volumes/{}/", "What is the name of your SD Card: "),
+    "linux": ("{}", "Where is your SD Card mounted (if you don't know, leave blank): ")
+}
+
+# Gnome: This makes sense to me, if it doesn't open a PR to change this and we can discuss.
+SD = SD_translator[current_platform][0].format(input(SD_translator[current_platform][1]))
+# Explaination: ^ get the formatting for path | ^ get the answer with the prompt in dict
 
 def gitlatest(repo, file_name, file = 0):
     print(f"Downloading {file_name} from {repo}")
@@ -71,7 +85,7 @@ for f in files:
 
 os.remove("godmode9.zip")
 
-if current_platform in ["windows", "macos"]:
+if current_platform in ["windows", "macos", "linux"]:
     copy_tree("SD Card", SD)
     print("\n===== Finished, your SD card is setup! =====")
     

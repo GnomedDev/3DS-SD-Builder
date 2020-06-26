@@ -6,12 +6,19 @@ from codecs import encode
 from zipfile import ZipFile
 from distutils.dir_util import copy_tree
 
-if platform == "win32":
-    current_platform = "windows"    
-elif platform == "darwin":
-    current_platform = "macos"
-else:
+# Input platform on left, output on right
+# Allows for easy expandablity for platform compatiblity
+platform_translator = {
+    "linux": "linux",
+    "linux2": "linux",
+    "win32": "windows",
+    "darwin": "macos",
+}
+
+if platform in platform_translator is False:
     current_platform = "other"
+else:
+    current_platform = platform_translator[platform]
 
 if os.path.exists("movable.sed") is False:
     if len(argv) == 2 and os.path.exists(argv[1]) and argv[1].endswith(".sed"):
@@ -20,14 +27,27 @@ if os.path.exists("movable.sed") is False:
         print("===== ERROR: Please download your movable.sed and place it in the same folder as this script =====")
         raise SystemExit 
 
-if current_platform in ["macos", "windows"]:
-    if current_platform == "windows":
-        SD = f'{input("What drive letter is your SD card: ")}:/'
-    elif current_platform == "macos":
-        SD_name = input("What is the name of your SD card: ")
-        SD = f"/Volumes/{SD_name}/"
+if current_platform in ["macos", "windows", "linux"]:
+    # Input platform on left, (how to format the path, prompt for input())
+    # Again, cleans up for expandablity and probably speeds up code (also looks better).
+    SD_translator = {
+        "windows": ("{}:/", "What drive letter is your SD Card: "),
+        "macos": ("/Volumes/{}/", "What is the name of your SD Card: "),
+        "linux": ("{}", "Where is your SD Card mounted (if you don't know, leave blank): ")
+    }
+    
+    # Gnome: This makes sense to me, if it doesn't open a PR to change this and we can discuss.
+    SD = SD_translator[current_platform][0].format(input(SD_translator[current_platform][1]))
+    # Explaination: ^ get the formatting for path | ^ get the answer with the prompt in dict
 
-    if os.path.exists(f"{SD}Nintendo 3DS/"):
+    if current_platform == "linux":
+        if SD.endswith("/") is False and SD.endswith("\\") is False:
+            SD = SD + "/"
+
+    if len(SD) <= 1:
+        current_platform = "other"
+
+    elif os.path.exists(f"{SD}Nintendo 3DS/"):
         folder = os.listdir(f"{SD}Nintendo 3DS/")
 
         # macOS creates a few "hidden" folders, including .DS_Store.
@@ -39,6 +59,9 @@ if current_platform in ["macos", "windows"]:
             if hidden_folder.startswith("."):
                 folder.remove(hidden_folder)
             elif hidden_folder.lower() == "private":
+                folder.remove(hidden_folder)
+            #Just in case, remove files.
+            elif os.path.isfile(hidden_folder):
                 folder.remove(hidden_folder)
 
         if len(folder) >= 2:
@@ -59,6 +82,9 @@ if current_platform in ["macos", "windows"]:
         for hidden_folder in folder:
             if hidden_folder.startswith("."):
                 folder.remove(hidden_folder)
+            #Just in case, remove files.
+            elif os.path.isfile(hidden_folder):
+                folder.remove(hidden_folder)
 
         if len(folder) >= 2:
             id1 = input("What is your id1 (folder inside id0): ")
@@ -72,7 +98,7 @@ if current_platform in ["macos", "windows"]:
                 print (f"===== ERROR: {SD}Nintendo 3DS/{id0}/<id1> doesn't exist =====")
                 raise SystemExit 
     else:
-        print (f"===== ERROR: {SD}Nintendo 3DS/ doesn't exist, make sure you put the right SD card drive letter =====")
+        print (f"===== ERROR: {SD}Nintendo 3DS/ doesn't exist, make sure you put the right SD Card drive letter =====")
         raise SystemExit 
         
 else:
@@ -141,13 +167,15 @@ os.mkdir("SD Card/luma/payloads")
 os.mkdir(f"SD Card/Nintendo 3DS")
 os.mkdir(f"SD Card/Nintendo 3DS/{id0}")
 os.mkdir(f"SD Card/Nintendo 3DS/{id0}/{id1}")
-os.mkdir(f"SD Card/Nintendo 3DS/{id0}/{id1}/Nintendo DSiware")
+os.mkdir(f"SD Card/Nintendo 3DS/{id0}/{id1}/Nintendo DSiWare")
 
 os.rename("temp/GodMode9.firm", "SD Card/luma/payloads/GodMode9.firm")
 os.rename("temp/gm9", "SD Card/gm9")
 os.rename("temp/boot.firm", "SD Card/boot.firm")
 os.rename("temp/boot.3dsx", "SD Card/boot.3dsx")
 os.rename("temp/usm.bin", "SD Card/usm.bin")
+print (os.listdir("temp"))
+print (os.listdir("SD Card"))
 os.rename("temp/F00D43D5.bin", f"SD Card/Nintendo 3DS/{id0}/{id1}/Nintendo DSiWare/F00D43D5.bin")
 
 files = os.listdir()
@@ -162,9 +190,9 @@ os.remove("luma.zip")
 os.remove("godmode9.zip")
 
 
-if current_platform in ["windows", "macos"]:
+if current_platform in ["windows", "macos", "linux"]:
     copy_tree("SD Card", SD)
-    print("\n===== Finished, your SD card is setup! =====")
+    print("\n===== Finished, your SD Card is setup! =====")
     
 else:
     file_paths = list()
@@ -174,7 +202,7 @@ else:
             filepath = os.path.join(root, filename) 
             file_paths.append(filepath) 
     
-    with ZipFile('Extract_to_Root_of_SD_Card.zip','w') as zip: 
+    with ZipFile('Extract_to_Root_of_SD Card.zip','w') as zip: 
         for f in file_paths: 
             zip.write(f) 
     print("\n===== Finished, made the zip file! =====")
