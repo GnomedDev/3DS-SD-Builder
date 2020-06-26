@@ -202,7 +202,7 @@ else:
             filepath = os.path.join(root, filename) 
             file_paths.append(filepath) 
     
-    with ZipFile('Extract_to_Root_of_SD Card.zip','w') as zip: 
+    with ZipFile('Extract_to_Root_of_SD_Card.zip','w') as zip: 
         for f in file_paths: 
             zip.write(f) 
     print("\n===== Finished, made the zip file! =====")
