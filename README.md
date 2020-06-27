@@ -19,6 +19,7 @@ Run the source python script with python3.
 ## Credits:
 
 nicl83#7436: Helping me with extracting the keyY from movable.sed
+nop#2908: Extracting id0 from keyY
 
 ### Testers
 nicl83#7436: macOS testing  

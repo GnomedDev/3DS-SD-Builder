@@ -1,9 +1,10 @@
 import os
 import shutil
 import requests
-from sys import platform, argv
 from codecs import encode
+from hashlib import sha256
 from zipfile import ZipFile
+from sys import platform, argv
 from distutils.dir_util import copy_tree
 
 # Input platform on left, output on right
@@ -27,6 +28,15 @@ if os.path.exists("movable.sed") is False:
         print("===== ERROR: Please download your movable.sed and place it in the same folder as this script =====")
         raise SystemExit 
 
+with open("movable.sed", "rb") as f:
+    important_section = f.read()[0x110:0x120]
+
+keyY = encode(important_section, "hex").decode("utf-8")
+
+# Credit to nop#2908 for this, getting id0 from keyY
+first_half = sha256(important_section).digest()[:0x10]
+id0 = b''.join(first_half[i:i+0x4][::-1] for i in range(0, len(first_half), 0x4)).hex()
+
 if current_platform in ["macos", "windows", "linux"]:
     # Input platform on left, (how to format the path, prompt for input())
     # Again, cleans up for expandablity and probably speeds up code (also looks better).
@@ -48,7 +58,11 @@ if current_platform in ["macos", "windows", "linux"]:
         current_platform = "other"
 
     elif os.path.exists(f"{SD}Nintendo 3DS/"):
-        folder = os.listdir(f"{SD}Nintendo 3DS/")
+        if os.path.exists(f"{SD}Nintendo 3DS/{id0}") is False:
+            print (f"===== ERROR: {SD}Nintendo 3DS/{id0} doesn't exist (mismatch between id0 in movable.sed and on SD) =====")
+            raise SystemExit 
+
+        folder = os.listdir(f"{SD}Nintendo 3DS/{id0}")
 
         # macOS creates a few "hidden" folders, including .DS_Store.
         # The following code is designed to filter such hidden folders out by checking
@@ -58,30 +72,7 @@ if current_platform in ["macos", "windows", "linux"]:
         for hidden_folder in folder:
             if hidden_folder.startswith("."):
                 folder.remove(hidden_folder)
-            elif hidden_folder.lower() == "private":
-                folder.remove(hidden_folder)
-            #Just in case, remove files.
-            elif os.path.isfile(hidden_folder):
-                folder.remove(hidden_folder)
-
-        if len(folder) >= 2:
-            id0 = input("What is your id0: ")
-            if os.path.exists(f"{SD}Nintendo 3DS/{id0}") is False:
-                print (f"===== ERROR: {SD}Nintendo 3DS/{id0} doesn't exist, make sure you put the right id0 =====")
-                raise SystemExit 
-        else:
-            try:
-                id0 = folder[0]
-            except IndexError:
-                print (f"===== ERROR: {SD}Nintendo 3DS/<id0> doesn't exist =====")
-                raise SystemExit 
-
-        folder = os.listdir(f"{SD}Nintendo 3DS/{id0}")
-
-        # See above for notes on hidden folders, and why this code is used.
-        for hidden_folder in folder:
-            if hidden_folder.startswith("."):
-                folder.remove(hidden_folder)
+            
             #Just in case, remove files.
             elif os.path.isfile(hidden_folder):
                 folder.remove(hidden_folder)
@@ -102,7 +93,6 @@ if current_platform in ["macos", "windows", "linux"]:
         raise SystemExit 
         
 else:
-    id0 = input("What is your id0: ")
     id1 = input("What is your id1: ")
 
 def gitlatest(repo, file_name, file = 0):
@@ -117,10 +107,6 @@ def gitlatest(repo, file_name, file = 0):
         print (f"Finished downloading {file_name} from {repo}\n")
 
 print("===== Starting download! =====\n")
-
-with open("movable.sed", "rb") as f:
-    important_section = f.read()[0x110:0x120]
-keyY = encode(important_section, "hex").decode("utf-8")
 
 with open("usm.zip", "wb") as f:
     print(f"Downloading usm.zip from https://usm.bruteforcemovable.com")
@@ -174,8 +160,6 @@ os.rename("temp/gm9", "SD Card/gm9")
 os.rename("temp/boot.firm", "SD Card/boot.firm")
 os.rename("temp/boot.3dsx", "SD Card/boot.3dsx")
 os.rename("temp/usm.bin", "SD Card/usm.bin")
-print (os.listdir("temp"))
-print (os.listdir("SD Card"))
 os.rename("temp/F00D43D5.bin", f"SD Card/Nintendo 3DS/{id0}/{id1}/Nintendo DSiWare/F00D43D5.bin")
 
 files = os.listdir()

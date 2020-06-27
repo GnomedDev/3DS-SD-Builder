@@ -2,7 +2,6 @@ import os
 import shutil
 import requests
 from sys import platform
-from codecs import encode
 from zipfile import ZipFile
 from distutils.dir_util import copy_tree
 
